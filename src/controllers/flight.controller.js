@@ -2,26 +2,28 @@ let flights = require("../data/flights");
 
 const updateFlight = (req, res) => {
 
-    // const data = req.body;
+    const data = req.body;
 
-    // if(!data?.origin || !data?.destination || !data?.shipment_number) {
-    //     return res.status(400).json({ success: false, message: "Origin and destination are required fields." });
-    // }
+    const flight_id = req.params.flight_id;
+ 
+    if(!data?.status) {
+        return res.status(400).json({ success: false, message: "Status is required fields." });
+    }
 
-    // const { origin, destination, shipment_number } = data;
+    const isExist = flights.find((flight) => flight.flight_number === flight_id);
 
-    // if(origin.trim() === "" || destination.trim() === "" || shipment_number.trim() === "") {
-    //     return res.status(400).json({ success: false, message: "Origin and destination are required fields." });
-    // }
+    if(!isExist) {
+        return res.status(400).json({ success: false, message: `Flight with ID '${flight_id}' not found.` });
+    }
 
-    // const shipment = {
-    //     shipment_number,
-    //     hops: [origin, destination]
-    // };
+    flights = flights.map((flight) => {
+      if (flight.flights_number === flight_id) {
+        return { ...flight, status: "landed"};
+      }
+      return flight;
+    });
 
-    // shipments.push(shipment);
-
-    // return res.status(201).json({ success: true, message: "Shipment created successfully.", data: shipment });
+    return res.status(200).json({ success: true, message: "Shipment created successfully.", data: { flight_number: flight_id, status: "landed" } });
 };
 
 
