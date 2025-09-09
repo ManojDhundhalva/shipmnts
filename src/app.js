@@ -1,24 +1,16 @@
 const express = require("express");
 const cors = require("cors");
-const corsConfig = require("./config/cors");
 
 const app = express();
 
 // Middleware
-app.use(cors(corsConfig));
+app.use(cors());
 app.use(express.json());
 
-// Routes
-const todoRoutes = require("./routes/todo.routes");
+// Import Routes
+const shipmentRoutes = require("./routes/shipments.routes");
 
 // Routes
-app.use('/todos', todoRoutes);
+app.use('/shipments', shipmentRoutes);
 
 module.exports = app;
-
-// For socket
-const http = require("http");
-const server = http.createServer(app);
-const io = initIO(server);
-socketHandlers(io);
-server.listen(PORT, () => console.log(`App listening on port ${PORT}`));
