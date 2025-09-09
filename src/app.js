@@ -9,8 +9,10 @@ app.use(express.json());
 
 // Import Routes
 const shipmentRoutes = require("./routes/shipments.routes");
+const flightsRoutes = require("./routes/flights.routes");
 
 // Routes
 app.use('/shipments', shipmentRoutes);
+app.use('/flights', flightsRoutes);
 
 module.exports = app;

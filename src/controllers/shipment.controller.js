@@ -1,4 +1,5 @@
-let shipments = require("../data/shipment");
+let flights = require("../data/flights");
+let shipments = require("../data/shipments");
 
 const createShipment = (req, res) => {
 
@@ -13,8 +14,6 @@ const createShipment = (req, res) => {
     if(origin.trim() === "" || destination.trim() === "" || shipment_number.trim() === "") {
         return res.status(400).json({ success: false, message: "Origin and destination are required fields." });
     }
-
-    // can check, if already exist shipment_number
 
     const shipment = {
         shipment_number,
@@ -32,8 +31,8 @@ const addHop = (req, res) => {
 
     const shipment_number = req.params.shipment_number;
 
-    if(!data?.previous_hop || !data?.next_hop || !data?.new_hop) {
-        return res.status(400).json({ success: false, message: "Previous hop, next hop and new hop are required fields." });
+    if(!data?.previous_hop || !data?.next_hop || !data?.new_hop || shipment_number.trim() === "") {
+        return res.status(400).json({ success: false, message: "Shipment number, Previous hop, next hop and new hop are required fields." });
     }
 
     const { previous_hop, next_hop, new_hop } = data;
@@ -64,4 +63,40 @@ const addHop = (req, res) => {
     return res.status(201).json({ success: true, message: "Hop added successfully.", data: new_shipment });
 };
 
-module.exports = { createShipment, addHop };
+const addFlight = (req, res) => {
+
+    const data = req.body;
+
+    const shipment_number = req.params.id;
+
+    if(!data?.carrier || !data?.from || !data?.to || !data?.flight_number || shipment_number.trim() === "") {
+        return res.status(400).json({ success: false, message: "Carrier, from, to, and flight number are required fields." });
+    }
+
+    const { carrier, from, to, flight_number } = data;
+
+    if(carrier.trim() === "" || from.trim() === "" || to.trim() === "" || flight_number.trim() === "") {
+        return res.status(400).json({ success: false, message: "Carrier, from, to, and flight number are required fields." });
+    }
+
+    const route = shipments.find((shipment) => shipment.hops.indexOf(from) !== -1 && shipment.hops.indexOf(to) !== -1 && (shipment.hops.indexOf(from) + 1 == shipment.hops.indexOf(to)));    
+
+    if(!route) {
+        return res.status(400).json({ success: false, message: "Unable to add a flight. The 'from' and 'to' locations are not consecutive hops for this shipment." });
+    }
+
+    const flight = {
+        shipment_number,
+        flight_number,
+        flight_path: `${from} - ${carrier} - ${to}`,
+        departure: data?.departure,
+        arrival: data?.arrival,
+        status: "in-transit"
+    };
+
+    flights.push(flight);
+
+    return res.status(201).json({ success: true, message: "Flight information added successfully.", data: flight });
+};
+
+module.exports = { createShipment, addHop, addFlight };
